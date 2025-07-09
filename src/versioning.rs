@@ -100,3 +100,71 @@ pub fn group_tags_by_scope(
     }
     scope_tag_map
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_scoped_tag_parse_unscoped() {
+        let tag = ScopedTag::parse("1.0.0").unwrap();
+        assert_eq!(tag.scope, None);
+        assert_eq!(tag.version.major, 1);
+        assert_eq!(tag.version.minor, 0);
+        assert_eq!(tag.version.patch, 0);
+    }
+
+    #[test]
+    fn test_scoped_tag_parse_scoped() {
+        let tag = ScopedTag::parse("backend/1.2.3").unwrap();
+        assert_eq!(tag.scope, Some("backend".to_string()));
+        assert_eq!(tag.version.major, 1);
+        assert_eq!(tag.version.minor, 2);
+        assert_eq!(tag.version.patch, 3);
+    }
+
+    #[test]
+    fn test_scoped_tag_parse_invalid() {
+        assert!(ScopedTag::parse("invalid").is_err());
+        assert!(ScopedTag::parse("scope/invalid").is_err());
+    }
+
+    #[test]
+    fn test_scoped_tag_bump_major() {
+        let tag = ScopedTag::parse("1.2.3").unwrap();
+        let bumped = tag.bump(Part::Major);
+        assert_eq!(bumped.version.major, 2);
+        assert_eq!(bumped.version.minor, 0);
+        assert_eq!(bumped.version.patch, 0);
+    }
+
+    #[test]
+    fn test_scoped_tag_bump_minor() {
+        let tag = ScopedTag::parse("1.2.3").unwrap();
+        let bumped = tag.bump(Part::Minor);
+        assert_eq!(bumped.version.major, 1);
+        assert_eq!(bumped.version.minor, 3);
+        assert_eq!(bumped.version.patch, 0);
+    }
+
+    #[test]
+    fn test_scoped_tag_bump_patch() {
+        let tag = ScopedTag::parse("1.2.3").unwrap();
+        let bumped = tag.bump(Part::Patch);
+        assert_eq!(bumped.version.major, 1);
+        assert_eq!(bumped.version.minor, 2);
+        assert_eq!(bumped.version.patch, 4);
+    }
+
+    #[test]
+    fn test_scoped_tag_display_unscoped() {
+        let tag = ScopedTag::parse("1.0.0").unwrap();
+        assert_eq!(tag.to_string(), "1.0.0");
+    }
+
+    #[test]
+    fn test_scoped_tag_display_scoped() {
+        let tag = ScopedTag::parse("backend/1.2.3").unwrap();
+        assert_eq!(tag.to_string(), "backend/1.2.3");
+    }
+}

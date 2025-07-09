@@ -90,21 +90,18 @@ fn main() -> Result<()> {
             }
             let tags = repo.tag_names(None)?;
             let scope_tag_map = group_tags_by_scope(&tags);
-            let versioned_tags = scope_tag_map
-                .get(&scope)
-                .context(match &scope {
-                    Some(s) => format!("No tags found for scope '{}'", s),
-                    None => "No unscoped tags found".to_string(),
-                })?;
-            let latest_tag = versioned_tags
-                .values()
-                .next_back()
-                .context(match &scope {
-                    Some(s) => format!("No tags found for scope '{}'", s),
-                    None => "No unscoped tags found".to_string(),
-                })?;
-            let latest_scoped_tag = ScopedTag::parse(latest_tag)
-                .context(format!("Unable to parse tag '{}' as a valid version", latest_tag))?;
+            let versioned_tags = scope_tag_map.get(&scope).context(match &scope {
+                Some(s) => format!("No tags found for scope '{}'", s),
+                None => "No unscoped tags found".to_string(),
+            })?;
+            let latest_tag = versioned_tags.values().next_back().context(match &scope {
+                Some(s) => format!("No tags found for scope '{}'", s),
+                None => "No unscoped tags found".to_string(),
+            })?;
+            let latest_scoped_tag = ScopedTag::parse(latest_tag).context(format!(
+                "Unable to parse tag '{}' as a valid version",
+                latest_tag
+            ))?;
             let new_scoped_tag = latest_scoped_tag.bump(part);
             println!("Bumping {} -> {}", latest_scoped_tag, new_scoped_tag);
             if !dry_run {
