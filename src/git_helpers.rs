@@ -8,11 +8,14 @@ pub fn git_tag(tag: &str) -> Result<()> {
         .arg(tag)
         .status()
         .context("Failed to execute git tag command")?;
-    
+
     if !status.success() {
-        return Err(anyhow::anyhow!("Git tag command failed with exit code: {}", status.code().unwrap_or(-1)));
+        return Err(anyhow::anyhow!(
+            "Git tag command failed with exit code: {}",
+            status.code().unwrap_or(-1)
+        ));
     }
-    
+
     Ok(())
 }
 
@@ -22,11 +25,14 @@ pub fn git_pull() -> Result<()> {
         .arg("--rebase")
         .status()
         .context("Failed to execute git pull command")?;
-    
+
     if !status.success() {
-        return Err(anyhow::anyhow!("Git pull command failed with exit code: {}", status.code().unwrap_or(-1)));
+        return Err(anyhow::anyhow!(
+            "Git pull command failed with exit code: {}",
+            status.code().unwrap_or(-1)
+        ));
     }
-    
+
     Ok(())
 }
 
@@ -36,11 +42,14 @@ pub fn git_push() -> Result<()> {
         .arg("--tags")
         .status()
         .context("Failed to execute git push command")?;
-    
+
     if !status.success() {
-        return Err(anyhow::anyhow!("Git push command failed with exit code: {}", status.code().unwrap_or(-1)));
+        return Err(anyhow::anyhow!(
+            "Git push command failed with exit code: {}",
+            status.code().unwrap_or(-1)
+        ));
     }
-    
+
     Ok(())
 }
 
