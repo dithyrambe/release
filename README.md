@@ -12,7 +12,7 @@ A Rust command-line tool for managing semantic versioning and Git releases with 
 
 ## Installation
 
-Build from source:
+Download the latest build binary or build from source:
 
 ```bash
 cargo build --release
@@ -76,23 +76,6 @@ The tool supports two tag formats:
 
 Scoped tags use the format `scope/version` where scope can be any string identifier.
 
-## Project Structure
-
-```
-src/
-├── main.rs           # CLI interface and main application logic
-├── git_helpers.rs    # Git operations (tag, pull, push, branch detection)
-└── versioning.rs     # Version parsing, bumping, and scoped tag handling
-```
-
-## Dependencies
-
-- **clap**: Command-line argument parsing
-- **git2**: Git repository operations
-- **semver**: Semantic version parsing and manipulation
-- **anyhow**: Error handling
-- **vergen-git2**: Build-time Git information
-
 ## Safety Features
 
 - Requires being on main branch (main/master) for releases unless `--allow-non-main` is used
@@ -120,15 +103,6 @@ release bump --part patch --push --dry-run  # Preview first
 release bump --part patch --push            # Then apply
 ```
 
-## Error Handling
-
-The tool provides clear error messages for common scenarios:
-- No Git repository found
-- Not on main branch
-- No existing tags found for scope
-- Invalid version format
-- Git operation failures
-
 ## Contributing
 
 This project uses Rust 2024 edition. Ensure you have a recent Rust toolchain installed.
@@ -137,9 +111,3 @@ This project uses Rust 2024 edition. Ensure you have a recent Rust toolchain ins
 # Run tests
 cargo test
 
-# Check formatting
-cargo fmt --check
-
-# Run linter
-cargo clippy
-```
