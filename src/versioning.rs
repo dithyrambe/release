@@ -17,25 +17,30 @@ pub enum Part {
 pub struct ScopedTag {
     pub scope: Option<String>,
     pub version: Version,
+    sep: Option<char>,
 }
 
 impl ScopedTag {
-    const SEP: char = '/';
+    const POSSIBLE_SEP: &[char] = &['@', '/', '_'];
 
     pub fn parse(tag_str: &str) -> Result<Self> {
-        if let Some((scope, ver)) = tag_str.rsplit_once(Self::SEP) {
-            let version = Version::parse(ver).context("Cannot parse version")?;
-            Ok(ScopedTag {
-                scope: Some(scope.to_string()),
-                version,
-            })
-        } else {
-            let version = Version::parse(tag_str)?;
-            Ok(ScopedTag {
-                scope: None,
-                version,
-            })
+        for &sep in Self::POSSIBLE_SEP {
+            if let Some((scope, ver)) = tag_str.rsplit_once(sep) {
+                if let Ok(version) = Version::parse(ver) {
+                    return Ok(ScopedTag {
+                        scope: Some(scope.to_string()),
+                        version,
+                        sep: Some(sep),
+                    });
+                }
+            };
         }
+        let version = Version::parse(tag_str).context("Unable to parse tag")?;
+        Ok(ScopedTag {
+            scope: None,
+            version,
+            sep: None,
+        })
     }
 
     pub fn bump(&self, part: Part) -> Self {
@@ -65,6 +70,7 @@ impl ScopedTag {
         ScopedTag {
             scope: self.scope.clone(),
             version: new_version,
+            sep: self.sep,
         }
     }
 }
@@ -78,8 +84,8 @@ impl FromStr for ScopedTag {
 
 impl Display for ScopedTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if let Some(scope) = &self.scope {
-            write!(f, "{}{}{}", scope, Self::SEP, self.version)
+        if let (Some(scope), Some(sep)) = (&self.scope, self.sep) {
+            write!(f, "{}{}{}", scope, sep, self.version)
         } else {
             write!(f, "{}", self.version)
         }
@@ -166,5 +172,33 @@ mod tests {
     fn test_scoped_tag_display_scoped() {
         let tag = ScopedTag::parse("backend/1.2.3").unwrap();
         assert_eq!(tag.to_string(), "backend/1.2.3");
+    }
+
+    #[test]
+    fn test_parse_slash_sep() {
+        let tag = "scope/subscope/0.1.2";
+        let scoped_tag = ScopedTag::parse(tag).unwrap();
+        assert_eq!(scoped_tag.sep, Some('/'))
+    }
+
+    #[test]
+    fn test_parse_at_sep() {
+        let tag = "scope/subscope@0.1.2";
+        let scoped_tag = ScopedTag::parse(tag).unwrap();
+        assert_eq!(scoped_tag.sep, Some('@'))
+    }
+
+    #[test]
+    fn test_parse_underscore_sep() {
+        let tag = "scope/subscope_0.1.2";
+        let scoped_tag = ScopedTag::parse(tag).unwrap();
+        assert_eq!(scoped_tag.sep, Some('_'))
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_unparsable_tag() {
+        let tag = "scope/subscope/nothing";
+        let _scoped_tag = ScopedTag::parse(tag).unwrap();
     }
 }
