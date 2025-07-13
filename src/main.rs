@@ -34,7 +34,7 @@ enum Commands {
     Bump {
         #[arg(help = "Scope to consider")]
         scope: Option<String>,
-        #[arg(short, long, value_enum)]
+        #[arg(short, long, value_enum, default_value_t=Part::Patch)]
         part: Part,
         #[arg(long)]
         push: bool,
