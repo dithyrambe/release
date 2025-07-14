@@ -17,6 +17,12 @@ use crate::{
 struct Args {
     #[command(subcommand)]
     cmd: Commands,
+    #[arg(
+        long,
+        default_value_t = false,
+        help = "Whether to pull new commits / tags before any action"
+    )]
+    no_pull: bool,
 }
 
 #[derive(Subcommand, Debug, Clone)]
@@ -47,6 +53,10 @@ enum Commands {
 
 fn main() -> Result<()> {
     let args = Args::parse();
+
+    if !args.no_pull {
+        git_pull().context("Unable to pull from remote")?
+    }
 
     let main_branches: HashSet<&str> = ["main", "master"].iter().cloned().collect();
     let repo = Repository::discover(".").context("No git repository found")?;
@@ -105,7 +115,6 @@ fn main() -> Result<()> {
             let new_scoped_tag = latest_scoped_tag.bump(part);
             println!("Bumping {} -> {}", latest_scoped_tag, new_scoped_tag);
             if !dry_run {
-                git_pull()?;
                 git_tag(&new_scoped_tag.to_string())?;
                 if push {
                     git_push()?;
