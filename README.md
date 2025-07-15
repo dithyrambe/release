@@ -1,113 +1,58 @@
-# Release CLI
+# 🛠️ Release CLI
 
-A Rust command-line tool for managing semantic versioning and Git releases with support for scoped tags.
+A no-fuss CLI tool for bumping versions and tagging Git releases — with scoped tag support if you need it.
 
-## Features
+## ✨ What It Does
 
-- **Semantic Versioning**: Supports major, minor, and patch version bumping following semver standards
-- **Scoped Tags**: Organize releases by scope (e.g., `frontend/1.0.0`, `backend/2.1.0`)
-- **Git Integration**: Automatically handles Git operations (pull, tag, push)
-- **Safety Features**: Requires main branch for releases (configurable)
-- **Dry Run Mode**: Preview changes before applying them
+- Bumps versions using [semver](https://semver.org/)
+- Creates Git tags like `1.2.3` or `frontend/1.2.3`
+- Handles Git stuff (pull, tag, push)
+- Keeps you safe with checks (like making sure you're on `main` or `master`)
+- Lets you dry-run before doing anything real
 
-## Installation
+## 🚀 Quick Start
 
-Download the latest build binary or build from source:
+Build it:
 
 ```bash
 cargo build --release
 ```
 
-The binary will be available at `target/release/release`.
-
-## Usage
-
-### List Releases
-
-List all releases or filter by scope:
+Run it from target/release/release
 
 ```bash
+# Bump patch version
+release bump --part patch
+
+# Bump minor for a specific scope
+release bump frontend --part minor
+
+# Push tag to remote
+release bump --part patch --push
+
+# Preview without applying
+release bump --part major --dry-run
+
 # List all releases
 release list --all-scopes
 
-# List releases for a specific scope
-release list frontend
-
-# Show only the latest release
-release list --latest
-
-# Show latest release for a specific scope
-release list frontend --latest
+# Get latest release for a scope
+release list backend --latest
 ```
 
-### Bump Version
+## 🏷️ Tag Format
 
-Create a new release by bumping the version:
+ - `1.0.0` – unscoped
+ - `frontend@2.1.0` – scoped
+ - `frontend@2.1.0` – scoped
+ - `lib/libname@2.1.0` – scoped
 
-```bash
-# Bump patch version (1.0.0 -> 1.0.1)
-release bump --part patch
+Use scopes to split up releases.
 
-# Bump minor version (1.0.0 -> 1.1.0)
-release bump --part minor
+## 💡 Tips
 
-# Bump major version (1.0.0 -> 2.0.0)
-release bump --part major
+ - By default, releases must happen from `main` or `master`
+ - Use --allow-non-main if you really know what you're doing
+ - Tool pulls latest changes before tagging
 
-# Bump version for a specific scope
-release bump frontend --part minor
-
-# Push tags to remote after creating
-release bump --part patch --push
-
-# Preview changes without applying
-release bump --part minor --dry-run
-
-# Allow bumping from non-main branches
-release bump --part patch --allow-non-main
-```
-
-## Tag Format
-
-The tool supports two tag formats:
-
-- **Unscoped**: `1.0.0`, `2.1.3`
-- **Scoped**: `frontend/1.0.0`, `backend/2.1.3`
-
-Scoped tags use the format `scope/version` where scope can be any string identifier.
-
-## Safety Features
-
-- Requires being on main branch (main/master) for releases unless `--allow-non-main` is used
-- Performs `git pull --rebase` before creating tags to ensure up-to-date state
-- Validates version format before proceeding
-- Dry run mode for testing changes
-
-## Examples
-
-```bash
-# Create first release
-release bump --part minor  # Creates 0.1.0
-
-# Create scoped release
-release bump frontend --part major  # Creates frontend/1.0.0
-
-# List all frontend releases
-release list frontend
-
-# Get latest release across all scopes
-release list --all-scopes --latest
-
-# Safe release with push
-release bump --part patch --push --dry-run  # Preview first
-release bump --part patch --push            # Then apply
-```
-
-## Contributing
-
-This project uses Rust 2024 edition. Ensure you have a recent Rust toolchain installed.
-
-```bash
-# Run tests
-cargo test
-
+That's it. Just run release bump, push, and you're good.
