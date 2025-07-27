@@ -75,11 +75,11 @@ fn main() -> Result<()> {
             for versioned_tags in scope_tag_map.values() {
                 if latest && !versioned_tags.is_empty() {
                     if let Some(latest_tag) = versioned_tags.values().next_back() {
-                        println!("{}", latest_tag);
+                        println!("{latest_tag}");
                     }
                 } else {
                     for tag in versioned_tags.values() {
-                        println!("{}", tag);
+                        println!("{tag}");
                     }
                 }
             }
@@ -101,19 +101,18 @@ fn main() -> Result<()> {
             let tags = repo.tag_names(None)?;
             let scope_tag_map = group_tags_by_scope(&tags);
             let versioned_tags = scope_tag_map.get(&scope).context(match &scope {
-                Some(s) => format!("No tags found for scope '{}'", s),
+                Some(s) => format!("No tags found for scope '{s}'"),
                 None => "No unscoped tags found".to_string(),
             })?;
             let latest_tag = versioned_tags.values().next_back().context(match &scope {
-                Some(s) => format!("No tags found for scope '{}'", s),
+                Some(s) => format!("No tags found for scope '{s}'"),
                 None => "No unscoped tags found".to_string(),
             })?;
             let latest_scoped_tag = ScopedTag::parse(latest_tag).context(format!(
-                "Unable to parse tag '{}' as a valid version",
-                latest_tag
+                "Unable to parse tag '{latest_tag}' as a valid version"
             ))?;
             let new_scoped_tag = latest_scoped_tag.bump(part);
-            println!("Bumping {} -> {}", latest_scoped_tag, new_scoped_tag);
+            println!("Bumping {latest_scoped_tag} -> {new_scoped_tag}");
             if !dry_run {
                 git_tag(&new_scoped_tag.to_string())?;
                 if push {
